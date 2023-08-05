@@ -41,6 +41,28 @@ function vertices_is_equals(other, vertices, triangles)
   end
 end
 
+function create_visual_face(index, triangles, vertices, object)
+  local v = get_vertices_from_triangle(triangles:get(index), vertices)
+  local model_renderer = ModelRenderer:new()
+  local material = Material:new()
+  local color = Color:new(0,0,0)
+  color:setIntGreen(240)
+  model_renderer:setMaterial(material)
+  object:addComponent(model_renderer)
+  material:setColor("diffuse", color)
+  
+  local vertex = Vertex:new()
+  vertex:setVertices(v)
+  local tr = luajava.newInstance("java.util.ArrayList")
+  local vec = Vector3:new()
+  vec:setX(0)
+  vec:setY(1)
+  vec:setZ(2)
+  tr:add(vec)
+  vertex:setTriangles(tr)
+  model_renderer:setVertex(vertex)
+end 
+
 function update()
   if Input:getTouch(0):isDown() then
     local hit = laser:trace(camera:getGlobalPosition(), 
@@ -53,8 +75,13 @@ function update()
       local object_vertices = object_vertex:getVertices()
       local object_triangles = object_vertex:getTriangles()
       local collider_vertices = hit:getCollider():getVertex():getVertices()
+      local test = vertices_is_equals(collider_vertices, object_vertices, object_triangles)
 
-      Console:log(vertices_is_equals(collider_vertices, object_vertices, object_triangles))
+      --object_triangles:remove(test)
+      --object_vertex:setTriangles(object_triangles)
+
+      create_visual_face(test, object_triangles, object_vertices, object)
+      object_triangles:remove(test)
     end
   end
 
