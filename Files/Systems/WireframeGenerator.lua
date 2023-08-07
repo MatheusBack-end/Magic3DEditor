@@ -13,10 +13,14 @@ function vector3(x, y, z)
   return vector3
 end
 
-function add_triangle(v)
-  local size = frame_vertices:size() -1
-  --Console:log(size)
-  frame_triangles:add( vector3( v:getX() + size, v:getY() + size, v:getZ() + size ) )
+function make_wireframe_from_face(triangle)
+  local a = model_vertices:get(triangle:getX())
+  local b = model_vertices:get(triangle:getY())
+  local c = model_vertices:get(triangle:getZ())
+
+  draw_line(a, b)
+  draw_line(b, c)
+  draw_line(c, a)
 end
 
 function add_vertice(v)
@@ -27,7 +31,7 @@ function add_vertice(v)
 end
 
 function draw_line(A, B)
-  local s = 0.01
+  local s = 0.003
 
   local va = add_vertice(vector3(A:getX() + s, A:getY(), A:getZ()))
   local vb = add_vertice(vector3(A:getX() - s, A:getY(), A:getZ()))
@@ -46,18 +50,8 @@ function generate()
 
   local eol = false -- end of list
 
-  for i = 0, (model_vertices:size() -1), 1 do
-
-    if (i + 1) >= (model_vertices:size() -1) then
-      eol = true
-    end
-
-    if eol == false then
-      local vertice_a = model_vertices:get(i)
-      local vertice_b = model_vertices:get(i + 1)
-
-      draw_line(vertice_a, vertice_b)
-    end
+  for i = 0, (model_triangles:size() -1), 1 do
+    make_wireframe_from_face(model_triangles:get(i))
   end
 
   local new_model_renderer = ModelRenderer:new()
