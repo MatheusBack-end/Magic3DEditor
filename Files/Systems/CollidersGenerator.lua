@@ -1,44 +1,32 @@
-collider_file = nil
-triangles = nil
-model = nil
-vertex = nil
-vertices = nil
+local triangles = nil
+local vertices = nil
 
-function get_vertices_from_triangle(triangle)
-  local v = luajava.newInstance("java.util.ArrayList")
+function createFaceCollider(index)
+  local collider = Collider:new()
+  local vertex = Vertex:new()
+  local face_triangles = AList:new()
+  local face_vertices = getVerticesFromTriangle(triangles:get(index), vertices)
 
-  v:add(vertices:get(triangle:getX()))
-  v:add(vertices:get(triangle:getY()))
-  v:add(vertices:get(triangle:getZ()))
-
-  return v
+  face_triangles:add(createVector3(0, 1, 2))
+  vertex:setVertices(face_vertices)
+  vertex:setTriangles(face_triangles)
+  collider:setVertex(vertex)
+  
+  return collider
 end
 
 function generate()
-  for i=0, triangles:size() -1, 1 do
-    local collider = Collider:new()
-    local vertex_l = Vertex:new()
-    local triangle = luajava.newInstance("java.util.ArrayList")
-    local vector = Vector3:new()
-    vector:setX(0)
-    vector:setY(1) -- <<<<< codigo lixo 
-    vector:setZ(2)
-    triangle:add(vector )
-    local vertice = get_vertices_from_triangle(triangles:get(i))
-    vertex_l:setVertices(vertice)
-    vertex_l:setTriangles(triangle)
-    collider:setVertex(vertex_l)
-    myObject:addComponent(collider)
+  for i = 0, triangles:size() -1, 1 do
+    myObject:addComponent(createFaceCollider(i))
   end
 end
 
 function start()
-  model = myObject:findComponent("ModelRenderer")
-  vertex = model:getVertex()
+  local vertex = myObject:findComponent("ModelRenderer"):getVertex()
   vertices = vertex:getVertices()
   triangles = vertex:getTriangles()
+
   generate()
 end
 
-function update()
-end
+function update()end
