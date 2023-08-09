@@ -13,14 +13,12 @@ function makeWireframeFromFace(triangle)
   end
 end
 
-
 function add(x, y, z)
   local size = frame_vertices:size()
   frame_vertices:add(createVector3(x, y, z))
 
   return size
 end
-
 
 function lineVertices(a, b, lt)
   local vertices = AList:new()
