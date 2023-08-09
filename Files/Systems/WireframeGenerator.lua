@@ -3,81 +3,79 @@ local model_triangles = nil
 local frame_vertices = nil
 local frame_triangles = nil
 
-function vector3(x, y, z)
-  local vector3 = Vector3:new()
-  
-  vector3:setX(x)
-  vector3:setY(y)
-  vector3:setZ(z)
+local triangles_map = {0, 1, 2, 1, 3, 2, 5, 6, 4, 2, 1, 0, 2, 3, 1, 5, 4, 0, 2, 5, 0, 1, 6, 7, 1, 7, 3}
 
-  return vector3
+function makeWireframeFromFace(triangle)
+  local vertices = getVerticesFromTriangle(triangle, model_vertices)
+
+  for i = 0, 2, 1 do
+    drawLine(vertices:get(i), vertices:get(clamp(0, i + 1, 2)))
+  end
 end
 
-function make_wireframe_from_face(triangle)
-  local a = model_vertices:get(triangle:getX())
-  local b = model_vertices:get(triangle:getY())
-  local c = model_vertices:get(triangle:getZ())
 
-  draw_line(a, b)
-  draw_line(b, c)
-  draw_line(c, a)
-end
-
-function add_vertice(v)
+function add(x, y, z)
   local size = frame_vertices:size()
-  frame_vertices:add(v)
+  frame_vertices:add(createVector3(x, y, z))
 
   return size
 end
 
-function draw_line(A, B)
-  --TODO: codigo lixo, refatorar ao longo do projeto
-  local s = 0.003
 
-  local va = add_vertice(vector3(A:getX() + s, A:getY() + s, A:getZ()))
-  local vb = add_vertice(vector3(A:getX() - s, A:getY() + s, A:getZ()))
-  local vc = add_vertice(vector3(B:getX() + s, B:getY() + s, B:getZ()))
-  local vd = add_vertice(vector3(B:getX() - s, B:getY() + s, B:getZ()))
-  local ve = add_vertice(vector3(A:getX() + s, A:getY() - s, A:getZ()))
-  local vf = add_vertice(vector3(B:getX() + s, B:getY() - s, B:getZ()))
-  local vg = add_vertice(vector3(A:getX() - s, A:getY() - s, A:getZ()))
-  local vh = add_vertice(vector3(B:getX() - s, B:getY() - s, B:getZ()))
+function lineVertices(a, b, lt)
+  local vertices = AList:new()
+  
+  vertices:add(add(a:getX() + lt, a:getY() + lt, a:getZ()))
+  vertices:add(add(a:getX() - lt, a:getY() + lt, a:getZ()))
+  vertices:add(add(b:getX() + lt, b:getY() + lt, b:getZ()))
+  vertices:add(add(b:getX() - lt, b:getY() + lt, b:getZ()))
+  vertices:add(add(a:getX() + lt, a:getY() - lt, a:getZ()))
+  vertices:add(add(b:getX() + lt, b:getY() - lt, b:getZ()))
+  vertices:add(add(a:getX() - lt, a:getY() - lt, a:getZ()))
+  vertices:add(add(b:getX() - lt, b:getY() - lt, b:getZ()))
 
-  frame_triangles:add(vector3(va, vb, vc))
-  frame_triangles:add(vector3(vb, vd, vc))
-  frame_triangles:add(vector3(vf, vg, ve))
-  frame_triangles:add(vector3(vf, vh, vg))
-  frame_triangles:add(vector3(vc, vb, va))
-  frame_triangles:add(vector3(vc, vd, vb))
-  frame_triangles:add(vector3(vf, ve, va))
-  frame_triangles:add(vector3(vc, vf, va))  
-  frame_triangles:add(vector3(vb, vg, vh))
-  frame_triangles:add(vector3(vb, vh, vd))
+  return vertices
+end
+
+function lineTriangles(v)
+  for i = 0, count(triangles_map) - 1, 3 do
+    frame_triangles:add(createVector3(v:get(triangles_map[i]), v:get(triangles_map[i + 1]), v:get(triangles_map[i + 2])))
+  end
+end
+
+function drawLine(A, B)
+  local line_thickness = 0.003
+
+  lineTriangles(lineVertices(A, B, line_thickness))
+end
+
+function createNewMaterial(model_renderer)
+  local material = Material:new()
+  local color = createColor(255, 0, 0, 0)
+  material:setColor("diffuse", color)
+  model_renderer:setMaterial(material)
+end
+
+function createNewModelRenderer()
+  local model_renderer = ModelRenderer:new()
+  local vertex = Vertex:new()
+  vertex:setVertices(frame_vertices)
+  vertex:setTriangles(frame_triangles)
+  model_renderer:setVertex(vertex)
+  createNewMaterial(model_renderer)
+
+  return model_renderer
 end
 
 function generate()
-  frame_vertices = luajava.newInstance("java.util.ArrayList")
-  frame_triangles = luajava.newInstance("java.util.ArrayList")
-
-  local eol = false -- end of list
+  frame_vertices = AList:new()
+  frame_triangles = AList:new()
 
   for i = 0, (model_triangles:size() -1), 1 do
-    make_wireframe_from_face(model_triangles:get(i))
+    makeWireframeFromFace(model_triangles:get(i))
   end
 
-  --draw_line(vector3(0,0,0), vector3(0,0,0.8))
-  local new_model_renderer = ModelRenderer:new()
-  local new_vertex = Vertex:new()
-  local color = Color:new(0,0,0)
-  color:setIntRed(0)
-  color:setIntGreen(0)
-  color:setIntBlue(0)
-  new_vertex:setVertices(frame_vertices)
-  new_vertex:setTriangles(frame_triangles)
-  new_model_renderer:setVertex(new_vertex)
-  new_model_renderer:setMaterial(Material:new())
-  myObject:addComponent(new_model_renderer)
-  new_model_renderer:getMaterial():setColor("diffuse", color)
+  myObject:addComponent(createNewModelRenderer())
 end
 
 function start()
@@ -89,5 +87,4 @@ function start()
   generate()
 end
 
-function update()
-end
+function update()end
