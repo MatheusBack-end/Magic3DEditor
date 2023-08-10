@@ -42,7 +42,7 @@ function lineTriangles(v)
 end
 
 function drawLine(A, B)
-  local line_thickness = 0.003
+  local line_thickness = 0.002
 
   lineTriangles(lineVertices(A, B, line_thickness))
 end
