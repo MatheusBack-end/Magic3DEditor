@@ -1,4 +1,5 @@
 local old_face = nil
+local last_object = nil
 
 function getFace(vertices_collider, model_vertices, triangles)
   for i = 0, triangles:size() -1, 1 do
@@ -15,6 +16,27 @@ function getFace(vertices_collider, model_vertices, triangles)
       return i
     end
   end
+end
+
+function getFaceCenter(vertices)
+  local x = 0
+  local y = 0
+  local z = 0
+
+  for i = 0, 2, 1 do
+    local vertice = vertices:get(i)
+    x = x + vertice:getX()
+    y = y + vertice:getY()
+    z = z + vertice:getZ()
+  end
+
+  return createVector3(x / 3, y / 3, z / 3)
+end
+
+function moveGizmo_test(vertices)
+  gizmo_x:teleportTo(getFaceCenter(vertices))
+  --pos:set(getFaceCenter(vertices))
+  --Console:log(pos)
 end
 
 function createVisualFace(vertices, object)
@@ -52,7 +74,13 @@ function traceLaser()
 
     if index ~= nil then
       createVisualFace(vertices, object)
+      moveGizmo_test(vertices)
       vertex:getTriangles():remove(index)
+      last_object = object
+    end
+  else
+    if old_face ~= nil then
+      last_object:removeComponent(old_face)
     end
   end
 end
