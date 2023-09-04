@@ -1,1 +1,0 @@
-ITsMagic Java package
