@@ -72,7 +72,7 @@ function trace_laser()
   if hit then
     in_move = true;
     EditorData.in_move = true;
-    foo = hit:getObject();
+    foo = hit:getColliderObject();
     test = get_vertices(foo);
   end
 end

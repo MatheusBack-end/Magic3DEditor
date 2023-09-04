@@ -2,7 +2,7 @@ local laser;
 local touch;
 local camera, camera_pivot;
 local gizmo = {"x", "y", "z"};
-local text = {};
+local all_axis_gizmo;
 
 function start()
   laser = Laser:new();
@@ -10,7 +10,6 @@ function start()
   camera_pivot = WorldController:findObject("pivot-camera");
   touch = Input:getTouch(0);
   set_gizmos();
-  set_texts();
 end
 
 function update()
@@ -20,15 +19,10 @@ function update()
 end
 
 function set_gizmos()
+  all_axis_gizmo = WorldController:findObject("gizmos");
+  
   for i=1, 3, 1 do
     gizmo[i] = WorldController:findObject("gizmo_" .. gizmo[i]);
-  end
-end
-
-function set_texts()
-  local sui = WorldController:findObject("SUI Interface");
-  for i=1, 3, 1 do
-    text[i] = sui:findChildObject("debug_text" .. i):findComponent("SUIText");
   end
 end
 
@@ -65,15 +59,17 @@ end
 
 function move_gizmos(to, vertices)
   for k, i in ipairs(gizmo) do
-    i:teleportTo(to);
+    --i:teleportTo(to);
     local data = i:findComponent("gizmo_data").globals;    
     hard_replace(vertices, LuaInvoker:invoke("get", data));
   end
   
+  all_axis_gizmo:teleportTo(to);
+  
   camera_pivot:teleportTo(to);
-  gizmo[1]:move(0.25, 0, 0);
+  --[[gizmo[1]:move(0.25, 0, 0);
   gizmo[2]:move(0, 0.25, 0);
-  gizmo[3]:move(0, 0, 0.25);
+  gizmo[3]:move(0, 0, 0.25);]]
 end
 
 function debug_texts(vertices)
