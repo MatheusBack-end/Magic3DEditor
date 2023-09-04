@@ -18,15 +18,17 @@ import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 public class LuaExecutor extends Component {
   
     public List<ProjectFile> modules = new ArrayList();
-    private Globals globals = null;
+    public Globals globals = null;
     private LuaValue entire_script = null;
     public ProjectFile file = new ProjectFile(".lua");
+    public String luaname = "luaj";
 
     @Override
     public void start()
     {
         load_script();
         LuaInvoker.invoke("start", globals);
+        //luaname = getLuaName();
     }
 
     @Override
@@ -42,7 +44,18 @@ public class LuaExecutor extends Component {
         replace_list_modules();
     }
     
-    private void load_script()
+    @Override
+    public String getComponentTittle()
+    {
+        return luaname;
+    }
+    
+    public String getLuaName()
+    {
+        return globals.get("luaname").tojstring();
+    }
+    
+    public void load_script()
     {
         if(entire_script != null)
         {
@@ -69,6 +82,7 @@ public class LuaExecutor extends Component {
         entire_script.call();
         globals.set("myObject", CoerceJavaToLua.coerce(myObject));
         globals.set("myTransform", CoerceJavaToLua.coerce(myTransform));
+        globals.set("luaname", CoerceJavaToLua.coerce(luaname));
     }
     
     public void replace_list_modules()
